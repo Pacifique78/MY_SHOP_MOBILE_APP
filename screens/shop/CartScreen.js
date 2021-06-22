@@ -1,14 +1,23 @@
-import React from 'react';
-import { View, Text, FlatList, StyleSheet, Button } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  Button,
+  ActivityIndicator,
+} from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import Color from '../../constants/Color';
 import CartItem from '../../components/shop/CartItem';
 import * as cartActions from '../../store/actions/cart';
 import * as ordersActions from '../../store/actions/orders';
 import Card from '../../components/UI/Card';
+import Colors from '../../constants/Color';
 
 const CartScreen = (props) => {
   const cartTotalAmount = useSelector((state) => state.cart.totalAmount);
+  const [isLoading, setIsLoading] = useState(false);
   const cartItems = useSelector((state) => {
     const transformedCartItems = [];
     for (const key in state.cart.items) {
@@ -25,6 +34,12 @@ const CartScreen = (props) => {
     );
   });
   const dispatch = useDispatch();
+
+  const sendOrdereHandler = async () => {
+    setIsLoading(true);
+    await dispatch(ordersActions.addOrder(cartItems, cartTotalAmount));
+    setIsLoading(false);
+  };
   return (
     <View style={styles.screen}>
       <Card style={styles.summary}>
@@ -34,14 +49,16 @@ const CartScreen = (props) => {
             ${Math.round(cartTotalAmount.toFixed(2) * 100) / 100}
           </Text>
         </Text>
-        <Button
-          title="Order Now"
-          color={Color.accent}
-          disabled={cartItems.length === 0}
-          onPress={() => {
-            dispatch(ordersActions.addOrder(cartItems, cartTotalAmount));
-          }}
-        />
+        {isLoading ? (
+          <ActivityIndicator size="small" color={Colors.primary} />
+        ) : (
+          <Button
+            title="Order Now"
+            color={Color.accent}
+            disabled={cartItems.length === 0}
+            onPress={sendOrdereHandler}
+          />
+        )}
       </Card>
       <FlatList
         data={cartItems}
