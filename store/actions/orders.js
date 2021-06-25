@@ -4,10 +4,11 @@ export const ADD_ORDER = 'ADD_ORDER';
 export const SET_ORDER = 'SET_ORDER';
 
 export const fetchOrders = () => {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
+    const userId = getState().auth.userId;
     try {
       const response = await fetch(
-        'https://my-shop-mobile-app-default-rtdb.europe-west1.firebasedatabase.app/orders/u1.json'
+        `https://my-shop-mobile-app-default-rtdb.europe-west1.firebasedatabase.app/orders/${userId}.json`
       );
       if (!response.ok) {
         throw new Error('Something wrong happened');
@@ -32,10 +33,12 @@ export const fetchOrders = () => {
 };
 
 export const addOrder = (cartItems, totalAmount) => {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
+    const userId = getState().auth.userId;
+    const token = getState().auth.token;
     const date = new Date();
     const response = await fetch(
-      'https://my-shop-mobile-app-default-rtdb.europe-west1.firebasedatabase.app/orders/u1.json',
+      `https://my-shop-mobile-app-default-rtdb.europe-west1.firebasedatabase.app/orders/${userId}.json?auth=${token}`,
       {
         method: 'POST',
         headers: {
